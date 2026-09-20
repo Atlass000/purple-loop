@@ -1,0 +1,45 @@
+MYSKILLOS PLATFORM TEST — "Dry run (simulation)"
+Project: PURPLE-LOOP - Red vs Blue Security Orchestration
+URL:     https://www.myskillos.com/project/490fe3ca-64b6-4831-b7e5-17a67adf7724
+Target:  Claude / subagent  (Project layout, .claude/)
+Date:    19 August 2026
+
+A step-by-step narration of how Claude would execute this structure — no real LLM call is made.
+
+ 1  [Chief] orchestrator-router analyzes the request, splits it into subtasks and delegates.
+ 2  [Sub]   red-team runs — Attacker. Produces abstract attack hypotheses across two lanes:
+            software/logic and social engineering / human process.
+ 3  [Sub]   security-auditor runs — Independent judge over attacker and defender. Issues one of
+            six verdicts per finding/mitigation pair.
+ 4  [Sub]   blue-team runs — Defender. Produces layered countermeasures: preventive, detective
+            and containment.
+ 5  [Sub]   safety-guardian runs — Cross-cutting filter on every attacker output before it
+            enters shared state. Passes, redacts or rejects.
+ 6  [Sub]   recon-analyst runs — Decomposes the target architecture into an asset inventory,
+            trust boundaries and an initial coverage map.
+ 7  ->      red-team reports its result to the chief (orchestrator-router).
+ 8  ->      security-auditor reports its result to the chief (orchestrator-router).
+ 9  ->      blue-team reports its result to the chief (orchestrator-router).
+10  [OK]    The flow completes — the chief merges outputs and presents them to the user.
+
+STRUCTURE CHECKS
+  PASS  No issues found — the structure is consistent.
+  PASS  Fully compatible — no conversion required.
+
+EXPORT
+  8 files, project layout (.claude/):
+    CLAUDE.md
+    .claude/agents/orchestrator-router  (chief, emitted as the CLAUDE.md orchestration section)
+    .claude/agents/red-team.md
+    .claude/agents/security-auditor.md
+    .claude/agents/blue-team.md
+    .claude/agents/safety-guardian.md
+    .claude/agents/recon-analyst.md
+    .myskillos/skill.json
+    claude-agents-cli.json
+
+NOTE
+  This platform test verifies the ORCHESTRATION STRUCTURE only. The behavioural test of the
+  system — five state invariants, the CHALLENGE feedback loop and the assertion that control
+  flow is not a fixed pipeline — is the self-test suite in implementation/purple_loop.py:
+      python purple_loop.py --self-test      ->  10/10 checks passed
