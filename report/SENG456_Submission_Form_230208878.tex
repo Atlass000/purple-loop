@@ -1,0 +1,586 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\renewcommand{\contentsname}{Contents}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.1cm,headheight=15pt]{geometry}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{tcolorbox}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\usepackage{hyperref}
+
+% -----------------------------------------------------------------
+% SENG 456 -- Individual Project Submission Form (completed)
+% -----------------------------------------------------------------
+
+\definecolor{courseNavy}{HTML}{17365D}
+\definecolor{courseBlue}{HTML}{2F5597}
+\definecolor{courseTeal}{HTML}{2F6F6D}
+\definecolor{courseOrange}{HTML}{A65E20}
+\definecolor{courseRed}{HTML}{9C2F2F}
+\definecolor{coursePaper}{HTML}{F7F4EC}
+\definecolor{courseGray}{HTML}{5B6573}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=courseBlue,
+  urlcolor=courseBlue,
+  pdfauthor={Mohammed Mustafa Kareem},
+  pdftitle={SENG 456 Individual Project Submission Form -- PURPLE-LOOP},
+  pdfsubject={Agent Orchestration and Multimodal Systems Term Project}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=1.6em,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=3pt,topsep=3pt}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small SENG 456 -- Individual Project Submission Form}
+\fancyhead[R]{\small \textcolor{courseGray}{2026 Summer School}}
+\fancyfoot[L]{\small OSTIM Technical University -- Software Engineering}
+\fancyfoot[R]{\small Page \thepage/\pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\newtcolorbox{projectbox}[2][]{
+  colback=coursePaper,
+  colframe=#2,
+  boxrule=0.8pt,
+  arc=2mm,
+  left=3mm,right=3mm,top=2mm,bottom=2mm,
+  before skip=6pt,after skip=6pt,
+  #1
+}
+
+\newtcolorbox{answerbox}{
+  colback=white,
+  colframe=courseGray!45,
+  boxrule=0.5pt,
+  arc=1.2mm,
+  left=2.5mm,right=2.5mm,top=1.5mm,bottom=1.5mm,
+  before skip=3pt,after skip=8pt
+}
+
+\newcommand{\sectionintro}[1]{\textcolor{courseGray}{\small #1}\par\vspace{2pt}}
+\newcommand{\qa}[2]{\textbf{#1}\par\vspace{-2pt}\begin{answerbox}#2\end{answerbox}}
+\newcommand{\yes}{$\checkmark$}
+\newcommand{\pl}{\texttt{purple\_loop.py}}
+
+\begin{document}
+\pagenumbering{roman}
+
+% ================================================================
+% COVER
+% ================================================================
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace*{0.2cm}
+    \IfFileExists{logos/LUT-LOGO-PNG.png}{%
+      \includegraphics[width=0.22\textwidth]{logos/LUT-LOGO-PNG.png}\par
+    }{}
+    \vspace{0.25cm}
+    {\large\bfseries OSTIM TECHNICAL UNIVERSITY\par}
+    {\normalsize Department of Software Engineering\par}
+    \vspace{0.35cm}
+    {\color{courseNavy}\rule{\linewidth}{1.4pt}\par}
+    \vspace{0.15cm}
+    {\Large\bfseries SENG 456\par}
+    {\large\bfseries AGENT ORCHESTRATION AND MULTIMODAL SYSTEMS\par}
+    \vspace{0.15cm}
+    {\color{courseNavy}\rule{\linewidth}{1.4pt}\par}
+    \vspace{0.35cm}
+    {\Large\bfseries INDIVIDUAL TERM PROJECT\par}
+    {\large\bfseries SUBMISSION FORM\par}
+  \end{center}
+
+  \vspace{0.45cm}
+  \begin{projectbox}{courseNavy}
+    \textbf{PROJECT TITLE}\par
+    \vspace{2pt}
+    {\large\bfseries PURPLE-LOOP --- A Dynamic Multi-Agent Orchestration Architecture for
+    Adversarial Security Evaluation (Red vs Blue vs Audit)}
+  \end{projectbox}
+
+  \small
+  \begin{tabularx}{\linewidth}{@{}L{0.30\linewidth}Y@{}}
+    \textbf{Full Name} & Mohammed Mustafa Kareem \\
+    \textbf{Student ID} & 230208878 \\
+    \textbf{Department / Program} & Software Engineering \\
+    \textbf{Email Address} & \href{mailto:230208878@ostimteknik.edu.tr}{230208878@ostimteknik.edu.tr} \\
+    \textbf{GitHub / Project URL} & {\footnotesize\href{https://www.myskillos.com/project/490fe3ca-64b6-4831-b7e5-17a67adf7724}{myskillos.com/project/490fe3ca-64b6-4831-b7e5-17a67adf7724}} \\
+    \textbf{Demo / Video URL (if available)} & Not provided \\
+    \textbf{Submission Date} & 19 August 2026 \\
+  \end{tabularx}
+
+  \vfill
+  \begin{center}
+    \begin{tcolorbox}[width=0.88\linewidth,colback=courseBlue!6,colframe=courseBlue,
+      arc=2mm,left=2mm,right=2mm,top=1mm,bottom=1mm]
+      \centering
+      {\normalsize\bfseries PROJECT SUBMISSION URL}\par
+      {\Large\bfseries\href{https://myskillos.com/proje}{myskillos.com/proje}}\par
+      \footnotesize Upload this form and the project files to the specified address.
+    \end{tcolorbox}
+    {\footnotesize 2026 Summer School -- Dr. Ufuk ASIL \& Dr. Maksat ATAGOZIEV}
+  \end{center}
+\end{titlepage}
+
+\pagenumbering{arabic}
+
+% ================================================================
+\section*{Brief Description}
+\addcontentsline{toc}{section}{Brief Description}
+
+\begin{projectbox}{courseBlue}
+PURPLE-LOOP is a dynamic multi-agent orchestration in which an attacker agent, a defender
+agent and an independent auditor argue over a shared state object until the auditor
+certifies convergence or the round budget is exhausted. Control flow is decided at runtime
+by two LLM judgments --- the auditor's verdict and the router's routing decision. The
+deterministic code only \emph{validates} moves; it never chooses them.
+\end{projectbox}
+
+\tableofcontents
+\newpage
+
+% ================================================================
+\section{Project Summary}
+\sectionintro{Provide a general overview of the project in a few short paragraphs.}
+
+\qa{The problem the project aims to solve}{%
+A classic security review is static: it walks a checklist, matches patterns with
+\texttt{if/else}, and emits a score. Such a pipeline cannot reason about novel attack
+composition, cannot argue with itself, and cannot decide that a particular question
+deserves a second look. Its output is also unfalsifiable --- a defence is recorded as
+effective because it was proposed, never because it was tested.
+
+PURPLE-LOOP replaces the checklist with a structured disagreement. The core problem it
+solves is making the \emph{control flow itself} a reasoning product: which agent speaks
+next, and what it is asked to do, is derived from the current epistemic state of the
+engagement rather than from a fixed script.}
+
+\qa{The purpose of the project and its target users}{%
+The purpose is to evaluate a described system architecture through adversarial debate and
+to produce a security posture assessment whose every claim is traceable to a recorded
+verdict. Target users are software engineering and security students running architecture
+reviews as a tabletop exercise, and engineers who want a structured second opinion on a
+design document before implementation. It is a teaching and design-review instrument, not
+a penetration-testing tool.}
+
+\qa{Brief project summary: How does the system work overall, and what does it produce?}{%
+The user supplies a free-text description of a (fictional) system. A \textbf{Router}
+(chief) agent inspects a compact digest of shared state and selects the next agent from a
+formally computed set of legal moves, writing that agent a specific mandate.
+\textbf{Recon} decomposes the target into assets and trust boundaries. \textbf{Red Team}
+produces attack hypotheses in two lanes --- software/logic and social engineering ---
+which pass through a \textbf{Safety Guardian} filter before entering state. \textbf{Blue
+Team} answers with layered countermeasures. The \textbf{Security Auditor} issues one of
+six verdicts per finding/mitigation pair; a \texttt{CHALLENGE} verdict sends the
+defender's own patch back to the attacker as the next target. The loop ends on
+convergence or budget exhaustion, after which the auditor authors the final report.
+
+Output: a Markdown engagement report containing an agent-authored executive summary, a
+0--100 security score with weighted breakdown, the full routing history, the disagreement
+history, a per-agent calibration ledger, the safety-guardian log, and a complete
+\texttt{final\_state.json} that allows any turn to be replayed.}
+
+\begin{tabularx}{\linewidth}{@{}L{0.34\linewidth}Y@{}}
+\textbf{Application domain} & Cybersecurity --- threat modelling and architecture review (tabletop, fictional targets) \\
+\textbf{Languages / technologies used} & Python 3.10+ (standard library only), Markdown/YAML agent specifications, JSON Schema, LaTeX \\
+\textbf{Models or services used} & Claude (\texttt{claude-sonnet-5}) through the Anthropic Messages API in \texttt{--live} mode; a deterministic mock brain for offline, key-free execution \\
+\textbf{Current project status} & Complete and runnable. 10/10 architectural self-tests pass; a full 12-round engagement executes end to end \\
+\end{tabularx}
+
+% ================================================================
+\section{Input, Output, and Usage}
+\sectionintro{Summarize what the system receives, what it produces, and how it is used.}
+
+\qa{Primary inputs}{%
+(1) \texttt{target\_spec} --- a free-text description of a fictional system architecture:
+components, data flows, stated controls and known constraints. The bundled example is
+\texttt{sample\_target.md}, a fictional fintech named ``NovaPay''.
+(2) \texttt{max\_rounds} --- the turn budget (6--12 recommended). No agent may extend it.}
+
+\qa{Primary outputs}{%
+(1) \texttt{sample\_run\_report.md} --- the engagement report: agent-authored executive
+summary, weighted score breakdown, routing history with the legal moves available at each
+turn, findings table, disagreement history, calibration ledger, guardian log, outstanding
+risk.
+(2) \texttt{final\_state.json} --- the complete \texttt{EngagementState} object, including
+the append-only patch history for replay.
+(3) A single composite security score on 0--100 with a letter grade.}
+
+\qa{Brief usage scenario: Main steps from the user request to the result}{%
+\begin{enumerate}[nosep]
+  \item The user writes or selects an architecture description and sets a round budget.
+  \item The orchestrator initialises \texttt{EngagementState} and calls the Router.
+  \item The Router returns \texttt{next\_agent} plus a mandate; the orchestrator verifies
+        the choice lies inside the legal-move set and runs that agent against its state
+        projection.
+  \item Attacker output is routed through the Safety Guardian; the resulting patch is
+        validated against five invariants and applied or rejected with a logged reason.
+  \item The scorecard and convergence metrics are recomputed; the loop repeats from step 3.
+  \item On convergence or budget exhaustion the Auditor authors the final report, which is
+        written to disk together with the final state.
+\end{enumerate}}
+
+\qa{A sample input and its corresponding output}{%
+\textbf{Input (excerpt from \texttt{sample\_target.md}):} ``Support desk --- outsourced to a
+BPO partner. Agents verify callers using name, date of birth, and the last four digits of
+the registered phone number, then may trigger a password reset from the admin console.''
+
+\textbf{Output (excerpt from the engagement report):} Finding \texttt{F1} (lane: social) ---
+\emph{``Support desk identity verification relies on knowledge that is not secret.''}
+Likelihood 4 / Impact 4, confidence 0.67. Round 3: Blue proposes mitigation \texttt{M1}
+with a preventive and a containment layer only. Round 4: the Auditor returns
+\texttt{INSUFFICIENT} --- \emph{``No detection layer: if prevention fails the event is
+invisible.''} Round 6: Blue submits \texttt{M4} (version 2) with a detection layer added.
+Round 7: verdict \texttt{SOUND}. Final engagement score: \textbf{82.6/100, grade B}.}
+
+% ================================================================
+\section{System Design}
+\sectionintro{Describe the architecture only to the extent that it applies to your project.}
+
+\qa{Why did you choose this approach? Briefly justify the choice of an agent, workflow, or traditional software}{%
+A fixed workflow (Recon $\rightarrow$ Red $\rightarrow$ Blue $\rightarrow$ Audit $\rightarrow$ end)
+was rejected because it wastes turns on solved areas and starves contested ones, and
+because it can never revisit a defence once proposed. Traditional software was rejected
+because the judgments involved --- ``is this attack reachable given these trust
+boundaries?'', ``does this patch actually close the finding?'' --- are not expressible as
+rules over a finite feature set.
+
+The agent approach was chosen specifically so that \emph{routing} could be a reasoning
+step. Two LLM decisions drive control flow: the Auditor's verdict on each
+finding/mitigation pair, and the Router's choice of the next agent and its mandate.
+Determinism is retained where it belongs: the legal-move set and the five state
+invariants are computed in code, so the LLM exercises judgment inside a formally bounded
+space rather than an unbounded one.}
+
+\qa{The system's main components and their responsibilities}{%
+Six agents plus a deterministic orchestration harness. The Router (chief) selects the next
+agent and writes its mandate. Recon builds the asset and trust-boundary inventory. Red
+Team generates attack hypotheses in two lanes. Blue Team produces three-layer
+countermeasures. The Security Auditor scores, contests, routes and reports. The Safety
+Guardian filters every attacker output. The harness owns state: it validates patches
+against the invariants, computes the legal-move set, recomputes the scorecard, and grades
+each routing prediction. Red and Blue never communicate directly --- all inter-agent
+communication is mediated by shared state, which makes every turn inspectable and
+replayable.}
+
+\qa{The main data or task flow between components}{%
+A single JSON object, \texttt{EngagementState}, is the only channel. Each agent receives a
+\emph{projection} of it (only entitled fields, with prior-round findings compacted to a
+headline) and returns a \emph{patch}, never a full rewrite. Patches are applied by the
+orchestrator under five invariants: findings are append-only; every mitigation must
+reference a live finding; the auditor may not author findings or mitigations; only the
+guardian may write attacker content; no agent may extend the round budget. Every applied
+or rejected patch is recorded in \texttt{patch\_history}.}
+
+\begin{projectbox}{courseTeal}
+\textbf{Architecture diagram:}\par
+\vspace{2mm}
+\IfFileExists{architecture.png}{\includegraphics[width=\linewidth]{architecture.png}}{}
+\end{projectbox}
+
+% ================================================================
+\section{Agents, Tools, and Integrations}
+\sectionintro{If your project does not use agents or external tools, you may write ``not used'' in the relevant rows.}
+
+\begin{tabularx}{\linewidth}{@{}L{2.9cm}Y Y@{}}
+\toprule
+\textbf{Component / agent / tool} & \textbf{Brief responsibility} & \textbf{Information received or produced} \\
+\midrule
+\texttt{orchestrator-router} (Chief) &
+Chooses the next agent and writes its mandate; may choose only from the legal-move set &
+Receives a compact state digest and the legal moves; produces \texttt{next\_agent}, \texttt{mandate}, \texttt{lane}, rationale and a falsifiable prediction \\
+
+\texttt{recon-analyst} &
+Decomposes the target; surfaces the human and process assets the specification omitted &
+Receives \texttt{target\_spec}; produces \texttt{asset\_inventory}, \texttt{trust\_boundaries}, \texttt{coverage\_map}, \texttt{unknowns} \\
+
+\texttt{red-team} &
+Attacker. Generates abstract attack hypotheses in the logic and social lanes; attacks deployed patches on a \texttt{CHALLENGE} mandate &
+Receives assets, boundaries, existing mitigations and verdicts; produces \texttt{findings[]} with ATT\&CK IDs, likelihood, impact, confidence, novelty \\
+
+\texttt{blue-team} &
+Defender. Produces preventive, detective and containment layers per finding and declares the assumptions each control rests on &
+Receives findings and verdicts; produces \texttt{mitigations[]} with \texttt{assumptions}, \texttt{does\_not\_stop}, residual-risk claim \\
+
+\texttt{security-auditor} &
+Independent judge; scores, contests, instructs, decides convergence, authors the report &
+Receives the full state except \texttt{target\_spec}; produces \texttt{audit\_verdicts[]}, \texttt{scorecard}, \texttt{calibration\_ledger}, \texttt{final\_report} \\
+
+\texttt{safety-guardian} &
+Filters every attacker output before the state write: PASS, REDACT or REJECT &
+Receives candidate findings; produces sanitized findings and \texttt{guardian\_log} \\
+\bottomrule
+\end{tabularx}
+
+\qa{APIs, data sources, MCP, Skills, models, or other integrations used (if any)}{%
+Anthropic Messages API (\texttt{claude-sonnet-5}) in \texttt{--live} mode; no key is
+required for the default mock mode. The agent team is packaged as a Skill in the
+Myskillos / Claude layout (\texttt{CLAUDE.md} plus \texttt{.claude/agents/*.md}), generated
+from the prompt document by \texttt{python purple\_loop.py --build-package} so the report
+and the uploaded skill cannot drift apart. Conceptual references only, with no runtime
+dependency: the MITRE ATT\&CK technique vocabulary and the STRIDE threat categories. No
+external data sources, databases or network calls are used at run time.}
+
+\qa{Important decisions, permission boundaries, or operations requiring human approval (if any)}{%
+Three boundaries are enforced structurally rather than by convention. (1) The Safety
+Guardian sits between the attacker and shared state; attacker output that has not been
+cleared is rejected by the patch validator, so the filter cannot be bypassed even by a
+malformed agent response. (2) Separation of powers: the auditor is structurally prevented
+from authoring findings or mitigations, so the judge cannot manufacture the evidence it
+scores. (3) Human escalation: when no legal move would meaningfully advance the engagement
+--- for example when the target description is too thin to support further analysis ---
+the Router returns \texttt{next\_agent: "HUMAN"} with one specific question and the
+engagement pauses rather than fabricating depth. The round budget is likewise a human-only
+parameter; no agent can extend it.}
+
+% ================================================================
+\section{Implementation and Execution}
+
+\begin{tabularx}{\linewidth}{@{}L{0.35\linewidth}Y@{}}
+\textbf{Source code URL} & Included in this submission (\texttt{implementation/}). Myskillos project: \href{https://www.myskillos.com/project/490fe3ca-64b6-4831-b7e5-17a67adf7724}{myskillos.com/project/490fe3ca…} (agent team exported to \texttt{myskillos\_export/}) \\
+\textbf{Main execution command} & \texttt{python purple\_loop.py --target sample\_target.md} \\
+\textbf{Required core dependencies} & Python 3.10+ with the standard library only. Optional: \texttt{anthropic} (needed only for \texttt{--live}) \\
+\textbf{Important files or folders} & \pl{} (orchestrator), \texttt{02\_AGENT\_PROMPTS.md} (all six system prompts), \texttt{03\_STATE\_SCHEMA.json}, \texttt{04\_SCORING\_RUBRIC.md}, \texttt{myskillos\_package/} \\
+\textbf{Execution environment} & Any OS with Python 3.10+; no API key, network access or GPU required for the default run \\
+\end{tabularx}
+
+\qa{Brief installation and usage steps for running the project}{%
+\begin{enumerate}[nosep]
+  \item Extract the submission archive and open the \texttt{implementation/} folder.
+  \item \texttt{python purple\_loop.py --self-test} --- asserts the ten architectural
+        invariants. Expected: \texttt{10/10 checks passed}.
+  \item \texttt{python purple\_loop.py --target sample\_target.md} --- runs a full
+        engagement and writes \texttt{sample\_run\_report.md} and
+        \texttt{final\_state.json}. No API key needed.
+  \item Optional: \texttt{export ANTHROPIC\_API\_KEY=...} then add \texttt{--live} to drive
+        the same orchestration with real LLM agents.
+  \item Optional: \texttt{python purple\_loop.py --build-package} regenerates the
+        Myskillos-importable agent team from the prompt document.
+\end{enumerate}}
+
+\qa{A significant technical problem encountered and the solution applied}{%
+\textbf{Problem --- infinite adversarial escalation.} The \texttt{CHALLENGE} verdict is the
+mechanism that makes the system a loop rather than a pipeline: the defender's patch becomes
+the attacker's next target. In the first working version this never terminated. Each
+successful bypass was recorded as a \emph{new} finding, which the defender then mitigated,
+which the auditor then challenged, which the attacker then bypassed. The engagement
+consumed its entire budget on a single ancestral finding and the score oscillated instead
+of converging.
+
+\textbf{Solution --- make ``no bypass found'' a first-class, scored outcome.} Two changes.
+First, a reworked (version 2) layered control resists the bypass attempt, and the attacker
+is required to report that failure honestly through its \texttt{self\_rejected} channel
+rather than manufacturing a weaker finding to appear productive. Second, the auditor
+re-audits the challenged pair once the challenge has been answered: if a bypass was
+produced the verdict is \texttt{INSUFFICIENT}, and if none was produced the verdict is
+\texttt{SOUND} with a \textbf{durability bonus} of $+3$. The bonus is the only way in the
+rubric to earn points for a defence being \emph{tested} rather than merely asserted, so
+the termination fix and the scoring model reinforce each other instead of competing. Turn
+8 of the bundled run is exactly this case: the attacker produces nothing and the defender
+scores for it.}
+
+% ================================================================
+\section{Tests and Results}
+\sectionintro{Describe the basic checks performed to demonstrate that the project works.}
+
+\begin{tabularx}{\linewidth}{@{}C{0.7cm}Y Y L{2.0cm}@{}}
+\toprule
+& \textbf{Trial / test} & \textbf{Result obtained} & \textbf{Status} \\
+\midrule
+1 & Invariant suite: \texttt{--self-test} asserts all five state invariants, the verdict vocabulary, guardian redaction, prompt loading and state projection & \texttt{10/10 checks passed}; attempts to bypass the guardian or to let the auditor author findings raise \texttt{InvariantError} & Pass \\
+2 & Full engagement: 12-round run against \texttt{sample\_target.md} in mock mode & Ran to completion; 3 findings, 6 mitigations, 8 verdicts, 0 rejected patches; final score \textbf{82.6/100 (B)} & Pass \\
+3 & Non-pipeline assertion: executed agent sequence compared against the fixed cycle Recon/Red/Blue/Audit & Sequence diverges from the fixed cycle; Red is called three times with three different mandates & Pass \\
+4 & Safety Guardian: a candidate finding containing operational text is submitted to the filter & Action \texttt{REDACT}; the operational phrasing is replaced by the vulnerability class and the ATT\&CK reference & Pass \\
+5 & Myskillos platform dry run: the six-agent team was built on the visual editor, saved and tested & \emph{``No issues found --- the structure is consistent''}; export reports full compatibility, 8 files & Pass \\
+\bottomrule
+\end{tabularx}
+
+\qa{Overall result: To what extent did the project achieve its objective?}{%
+The objective --- an orchestration whose control flow is a reasoning product rather than a
+script --- was achieved and is machine-verifiable rather than merely claimed. Three moments
+in the bundled run are unreachable in a static pipeline: round 5, which exists only because
+a verdict sent control \emph{backwards} from judge to attacker; round 8, where the attacker
+correctly produces nothing and the defender earns a durability bonus for surviving; and
+rounds 9--11, where a defender that regressed was caught twice by the same rubric. All
+three technical expectations of the course are implemented and covered by the self-test
+suite. The scoring model, the six-verdict vocabulary and the calibration ledger together
+make each score traceable to a specific recorded judgment.}
+
+\qa{Known limitations or incomplete aspects}{%
+\begin{itemize}[nosep]
+  \item \textbf{Routing bias (measured, not hidden).} The policy prioritises answering
+        outstanding verdicts over exploring untouched coverage, so a run with many
+        challenge loops can exhaust its budget having probed only one lane. The bundled
+        run ends at 0.30 attack-surface coverage. The fix is to reserve a fraction of the
+        budget for exploration; it was left visible because a routing policy with a
+        demonstrated failure mode is more informative than one never measured.
+  \item \textbf{Mock brain.} The offline stand-in exercises the control flow faithfully,
+        but its security \emph{content} is fixed text; only \texttt{--live} produces
+        genuine agent reasoning.
+  \item \textbf{Not empirical.} LLM agents are not penetration testers. Scores are
+        relative evaluations of an architecture \emph{description}, never measurements of
+        a running system.
+  \item \textbf{Heuristic thresholds.} The 0.25 novelty floor and 3.0 score-delta epsilon
+        were chosen by judgment and would need tuning against real engagements.
+  \item Adversarial self-critique reduces but does not eliminate agreement bias; the
+        novelty floor and lane switching are mitigations, not proofs.
+\end{itemize}}
+
+% ================================================================
+\section{Security and Responsible Use}
+\sectionintro{Evaluate only the items relevant to your project.}
+
+\begin{tabularx}{\linewidth}{@{}C{1.0cm}Y@{}}
+\toprule
+\textbf{OK} & \textbf{Check} \\
+\midrule
+\yes & Secret keys and passwords were not included in the source code. \\
+\yes & User data was processed only to the extent necessary. \\
+\yes & Risky or irreversible operations were restricted. \\
+\yes & Sources and third-party content used were identified. \\
+\bottomrule
+\end{tabularx}
+
+\qa{Project-specific security, ethics, privacy, or copyright concerns and the measures taken}{%
+The central concern in a Red-versus-Blue simulation is that an attacker agent could be
+induced to emit operationally useful attack content. The measure taken is architectural
+rather than advisory: a dedicated \texttt{safety-guardian} agent inspects every attacker
+output before it can enter shared state, and the patch validator rejects any attacker
+content that has not been cleared, so the filter cannot be skipped by a malformed
+response. Attack reasoning is therefore constrained to vulnerability \emph{classes}, MITRE
+ATT\&CK technique identifiers and kill-chain narratives; exploit code, payloads,
+command lines, malware, evasion tradecraft and ready-to-send phishing text are out of
+scope by construction. The guardian is instructed to prefer redaction over rejection so
+analytical value is preserved, but the code and malware rules are reject-only.
+
+The evaluation target is fictional (``NovaPay'') and the guardian additionally replaces any
+real, named organisation, product version or person with a generic placeholder, so the
+system cannot be pointed at a real organisation through the input alone. This constraint
+deliberately reduces attack specificity: the project accepts a small loss of analytical
+fidelity for a safety property treated as non-negotiable.
+
+No personal data is processed and no credentials appear in the source. The API key, when
+\texttt{--live} is used, is read from the environment and never written to state, logs or
+the report. Third-party content is limited to the conceptual ATT\&CK and STRIDE
+vocabularies, which are cited in the references and not redistributed.}
+
+% ================================================================
+\section{Conclusion and Future Work}
+
+\qa{The most important results and learning outcomes obtained from the project}{%
+The main result is that adversarial multi-agent orchestration can be made
+\emph{auditable}. Because every routing decision carries a rationale and a falsifiable
+prediction, and every verdict carries a rationale that cites state, the final score is
+defensible line by line rather than being an opaque number.
+
+The main learning outcome was that the difficult part of multi-agent design is not
+prompting the agents --- it is deciding what the deterministic layer must own. Placing the
+legal-move computation, the state invariants and the scoring arithmetic in code, and
+leaving only judgment to the model, is what made the system both non-trivial and
+debuggable. A second lesson came from the termination bug: self-critiquing agent teams
+fail in two opposite directions --- agreeing too early, and escalating forever --- and both
+needed an explicit countermeasure, the novelty floor for the first and the durability
+bonus for the second.}
+
+\qa{Improvements that could be made with more time}{%
+\begin{itemize}[nosep]
+  \item \textbf{Budgeted exploration.} Reserve a fraction of the round budget for coverage
+        so challenge loops cannot starve an entire attack lane --- the one measured
+        weakness of the current routing policy.
+  \item \textbf{Parallel Red lanes.} Run the logic and social lanes concurrently and let
+        the Router arbitrate between their findings, rather than switching sequentially.
+  \item \textbf{Calibration over many runs.} The confidence multipliers currently reset
+        each engagement; persisting them across runs would let agent reliability be
+        learned rather than assumed.
+  \item \textbf{Threshold tuning.} Fit the novelty floor and convergence epsilon against a
+        corpus of real architecture reviews instead of choosing them by judgment.
+  \item \textbf{Human-in-the-loop review.} Expose the \texttt{HUMAN} escalation as an
+        interactive prompt so an operator can supply missing architecture detail mid-run.
+\end{itemize}}
+
+\qa{Core course concepts applied in the project}{%
+\textbf{State management} --- a single JSON blackboard with patch-based writes, an
+append-only history, per-agent read projections, context compaction and five enforced
+invariants. \textbf{Reflection and feedback loops} --- three nested loops: intra-agent
+draft/critique/revise, a six-verdict adversarial cross-critique in which the
+\texttt{CHALLENGE} verdict re-routes control backwards, and engagement-level convergence
+with cross-round confidence calibration. \textbf{Dynamic routing} --- an LLM router
+operating over a formally constrained legal-move set, generating mandates rather than mere
+destinations, and making falsifiable predictions that are graded the following round.
+Alongside these: the orchestrator--worker pattern, separation of powers between generator
+and judge, guardrails as an architectural component, and structured JSON contracts between
+agents.}
+
+% ================================================================
+\section{References and Submission Checklist}
+
+\qa{Documents, articles, datasets, models, open-source projects, or other resources used}{%
+\begin{itemize}[nosep]
+  \item MITRE ATT\&CK Enterprise technique taxonomy --- \url{https://attack.mitre.org}
+        (used as a vocabulary for referring to techniques abstractly; not redistributed).
+  \item STRIDE threat categorisation (Microsoft) --- used as the structure of the
+        \texttt{coverage\_map}.
+  \item Anthropic Claude documentation and Messages API --- \url{https://docs.claude.com}
+        (model \texttt{claude-sonnet-5}, used in \texttt{--live} mode).
+  \item Myskillos agent platform --- \url{https://myskillos.com} (skill packaging format:
+        \texttt{CLAUDE.md} plus \texttt{.claude/agents/*.md}).
+  \item SENG 456 course materials on agent orchestration, state management and dynamic
+        routing.
+  \item AI assistance: Claude was used to help design and implement the orchestration, as
+        explicitly permitted by the project brief. All architectural decisions, the
+        verdict vocabulary, the scoring model and the final content of this report were
+        reviewed and are owned by the author.
+\end{itemize}}
+
+\begin{tabularx}{\linewidth}{@{}C{1.0cm}Y@{}}
+\toprule
+\textbf{OK} & \textbf{Submission item} \\
+\midrule
+\yes & A completed PDF version of this form is included. \\
+\yes & The source code or project files are accessible. \\
+\yes & Installation and execution instructions are included. \\
+\yes & A test result or sample usage result is included. \\
+\yes & No secret keys, passwords, or unauthorized personal data are included. \\
+\yes & Demo, video, or supplementary file links work, if provided. \\
+\bottomrule
+\end{tabularx}
+
+% ================================================================
+\section{Student Declaration}
+
+\begin{projectbox}{courseRed}
+I declare that I prepared this project individually; identified the sources,
+third-party code, and artificial intelligence assistance I used; and ensured that
+the submission files contain no secret keys or unauthorized personal data.
+\end{projectbox}
+
+\vspace{6mm}
+\begin{tabularx}{\linewidth}{@{}L{0.25\linewidth}Y@{}}
+\textbf{Full Name} & Mohammed Mustafa Kareem \\
+\textbf{Student ID} & 230208878 \\
+\textbf{Date} & 19 August 2026 \\
+\textbf{Signature} & \rule{\linewidth}{0.4pt} \\
+\end{tabularx}
+
+\end{document}
