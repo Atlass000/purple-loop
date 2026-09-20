@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PURPLE-LOOP EngagementState",
+  "type": "object",
+  "required": ["engagement_id", "round", "max_rounds", "target_spec"],
+  "properties": {
+    "engagement_id": { "type": "string" },
+    "round": { "type": "integer", "minimum": 0 },
+    "max_rounds": { "type": "integer", "minimum": 1 },
+    "phase": { "type": "string", "enum": ["RECON", "PROBE", "DEFEND", "AUDIT", "CHALLENGE", "REPORT", "DONE"] },
+    "target_spec": { "type": "string" },
+
+    "asset_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "tier", "exposure"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^A[0-9]+$" },
+          "name": { "type": "string" },
+          "tier": { "enum": ["crown_jewel", "sensitive", "supporting", "public"] },
+          "exposure": { "enum": ["public", "partner", "internal", "privileged"] },
+          "owner": { "type": "string" },
+          "inferred": { "type": "boolean" }
+        }
+      }
+    },
+
+    "trust_boundaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "to"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^TB[0-9]+$" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "controls": { "type": "array", "items": { "type": "string" } },
+          "weakest_link": { "type": "string" }
+        }
+      }
+    },
+
+    "coverage_map": {
+      "type": "object",
+      "properties": {
+        "STRIDE": {
+          "type": "object",
+          "properties": {
+            "spoofing": { "type": "number", "minimum": 0, "maximum": 1 },
+            "tampering": { "type": "number", "minimum": 0, "maximum": 1 },
+            "repudiation": { "type": "number", "minimum": 0, "maximum": 1 },
+            "info_disclosure": { "type": "number", "minimum": 0, "maximum": 1 },
+            "dos": { "type": "number", "minimum": 0, "maximum": 1 },
+            "eop": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "human_layer": {
+          "type": "object",
+          "properties": {
+            "phishing": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pretexting": { "type": "number", "minimum": 0, "maximum": 1 },
+            "insider": { "type": "number", "minimum": 0, "maximum": 1 },
+            "vendor_chain": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "lane", "title", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^F[0-9]+$" },
+          "round_introduced": { "type": "integer" },
+          "lane": { "enum": ["logic", "social"] },
+          "title": { "type": "string" },
+          "attack_narrative": { "type": "string", "description": "Abstract kill chain only. Guardian-sanitized." },
+          "attck": { "type": "array", "items": { "type": "string" } },
+          "assets_hit": { "type": "array", "items": { "type": "string" } },
+          "preconditions": { "type": "array", "items": { "type": "string" } },
+          "likelihood": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "impact": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "novelty": { "type": "number", "minimum": 0, "maximum": 1 },
+          "status": { "enum": ["OPEN", "MITIGATED", "CONTESTED", "RESIDUAL", "DISMISSED"] },
+          "supersedes": { "type": "array", "items": { "type": "string" } },
+          "bypasses_mitigation": { "type": ["string", "null"] },
+          "challenge_survived": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+
+    "mitigations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "finding_id"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^M[0-9]+$" },
+          "finding_id": { "type": "string" },
+          "version": { "type": "integer", "minimum": 1 },
+          "round": { "type": "integer" },
+          "preventive": { "type": "string" },
+          "detective": { "type": "string" },
+          "containment": { "type": "string" },
+          "assumptions": { "type": "array", "items": { "type": "string" } },
+          "does_not_stop": { "type": "array", "items": { "type": "string" } },
+          "introduces": { "type": "array", "items": { "type": "string" } },
+          "cost": { "enum": ["low", "medium", "high"] },
+          "residual_risk_claim": { "type": "number", "minimum": 0, "maximum": 1 },
+          "residual_justification": { "type": "string" }
+        }
+      }
+    },
+
+    "audit_verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["round", "finding_id", "verdict"],
+        "properties": {
+          "round": { "type": "integer" },
+          "finding_id": { "type": "string" },
+          "mitigation_id": { "type": ["string", "null"] },
+          "verdict": { "enum": ["SOUND", "INSUFFICIENT", "CHALLENGE", "OVERCLAIM", "SPECULATIVE", "RESIDUAL_ACCEPT"] },
+          "rationale": { "type": "string" },
+          "residual_risk_assessed": { "type": "number", "minimum": 0, "maximum": 1 },
+          "instruction_to": { "enum": ["RED", "BLUE", "none"] },
+          "mandate": { "type": "string" },
+          "anchoring_correction": { "type": "string" },
+          "resolved": { "type": "boolean" }
+        }
+      }
+    },
+
+    "scorecard": {
+      "type": "object",
+      "properties": {
+        "attack_surface_coverage": { "type": "number" },
+        "defense_depth": { "type": "number" },
+        "detection_coverage": { "type": "number" },
+        "blast_radius_control": { "type": "number" },
+        "residual_exploitability": { "type": "number" },
+        "bonuses": { "type": "number" },
+        "penalties": { "type": "number" },
+        "composite": { "type": "number", "minimum": 0, "maximum": 100 },
+        "grade": { "enum": ["A", "B", "C", "D", "F"] }
+      }
+    },
+
+    "calibration_ledger": {
+      "type": "object",
+      "properties": {
+        "RED": {
+          "type": "object",
+          "properties": {
+            "dismissed_high_conf": { "type": "integer" },
+            "multiplier": { "type": "number" }
+          }
+        },
+        "BLUE": {
+          "type": "object",
+          "properties": {
+            "overclaims": { "type": "integer" },
+            "multiplier": { "type": "number" }
+          }
+        }
+      }
+    },
+
+    "convergence": {
+      "type": "object",
+      "properties": {
+        "new_findings_last_round": { "type": "integer" },
+        "unresolved_count": { "type": "integer" },
+        "score_delta": { "type": "number" },
+        "red_novelty_avg": { "type": "number" },
+        "converged": { "type": "boolean" },
+        "reason": { "type": "string" }
+      }
+    },
+
+    "routing_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "round": { "type": "integer" },
+          "chose": { "type": "string" },
+          "mandate": { "type": "string" },
+          "lane": { "type": "string" },
+          "rationale": { "type": "string" },
+          "expected_state_change": { "type": "string" },
+          "prediction_held": { "type": ["boolean", "null"] },
+          "legal_moves": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "guardian_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "round": { "type": "integer" },
+          "finding_id": { "type": "string" },
+          "action": { "enum": ["PASS", "REDACT", "REJECT"] },
+          "rule_triggered": { "type": "string" },
+          "note": { "type": "string" },
+          "reframing_hint": { "type": "string" }
+        }
+      }
+    },
+
+    "patch_history": {
+      "type": "array",
+      "description": "Append-only log of every state patch, enabling full replay.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "round": { "type": "integer" },
+          "agent": { "type": "string" },
+          "patch_keys": { "type": "array", "items": { "type": "string" } },
+          "accepted": { "type": "boolean" },
+          "rejection_reason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

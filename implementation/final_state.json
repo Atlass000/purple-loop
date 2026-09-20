@@ -1,0 +1,824 @@
+{
+  "engagement_id": "eng-20260819-193148",
+  "round": 12,
+  "max_rounds": 12,
+  "phase": "DONE",
+  "target_spec": "# Target Architecture — \"NovaPay\" (fictional)\n\n> This is a **fictional** system description used as input to the PURPLE-LOOP tabletop\n> exercise. It does not describe any real product or organization.\n\n## Business\nNovaPay is a consumer fintech offering a mobile wallet, peer-to-peer transfers, and a\nprepaid card. It operates in three markets and has ~400k users.\n\n## Components\n- **Mobile app** (iOS/Android) talking to a single public **API gateway**.\n- **API gateway** — REST, behind a WAF and per-IP rate limiting. Routes are protected by\n  a bearer-token check at the route level.\n- **Identity provider (IdP)** — email/password plus SMS OTP. Handles login, password\n  reset, and session issuance. Password reset sends a link to the registered email.\n- **Core ledger service** — holds balances and transaction history.\n- **Customer data store** — PII: name, national ID number, address, KYC documents.\n- **KYC vendor integration** — a third-party provider performs identity verification and\n  posts the result back to an onboarding endpoint. The endpoint accepts callbacks from\n  the vendor's published IP range.\n- **Admin console** — internal tool for support and operations staff; can view accounts,\n  reset credentials, and reverse transactions.\n- **Support desk** — outsourced to a BPO partner. Agents verify callers using name, date\n  of birth, and the last four digits of the registered phone number, then may trigger a\n  password reset or unlock an account from the admin console.\n- **Observability** — application logs and nightly database backups shipped to a central\n  bucket shared across environments.\n- **CI/CD** — GitHub-based pipeline with branch protection; deploy credentials are stored\n  as long-lived repository secrets.\n\n## Data flows\n1. App → API gateway → IdP (auth) → ledger / customer store.\n2. KYC vendor → onboarding endpoint (callback) → customer store (sets `kyc_verified`).\n3. Support agent → admin console → IdP (credential reset) and ledger (reversal).\n4. All services → log pipeline → shared observability bucket → nightly backup.\n\n## Stated controls\n- WAF and rate limiting at the edge.\n- TLS everywhere; database encryption at rest.\n- MFA (SMS OTP) for end users at login.\n- Branch protection on the main repository.\n- Annual security awareness training for internal staff.\n\n## Known constraints\n- The support desk BPO contract does not currently allow biometric or hardware-token\n  verification of callers.\n- The KYC vendor does not support signed callbacks on the current contract tier.\n- A legacy account-recovery path from the 2021 platform is still enabled for a subset of\n  users who have not migrated.\n",
+  "asset_inventory": [
+    {
+      "id": "A1",
+      "name": "Customer PII / ledger store",
+      "tier": "crown_jewel",
+      "exposure": "internal",
+      "owner": "platform",
+      "inferred": false
+    },
+    {
+      "id": "A2",
+      "name": "Identity provider / auth service",
+      "tier": "crown_jewel",
+      "exposure": "public",
+      "owner": "platform",
+      "inferred": false
+    },
+    {
+      "id": "A3",
+      "name": "Admin console",
+      "tier": "sensitive",
+      "exposure": "privileged",
+      "owner": "ops",
+      "inferred": true
+    },
+    {
+      "id": "A4",
+      "name": "Third-party KYC vendor integration",
+      "tier": "sensitive",
+      "exposure": "partner",
+      "owner": "compliance",
+      "inferred": false
+    },
+    {
+      "id": "A5",
+      "name": "Outsourced support desk (people + process)",
+      "tier": "sensitive",
+      "exposure": "partner",
+      "owner": "cx",
+      "inferred": true
+    },
+    {
+      "id": "A6",
+      "name": "Log & backup pipeline",
+      "tier": "sensitive",
+      "exposure": "internal",
+      "owner": "platform",
+      "inferred": true
+    },
+    {
+      "id": "A7",
+      "name": "CI/CD pipeline and secrets store",
+      "tier": "crown_jewel",
+      "exposure": "internal",
+      "owner": "platform",
+      "inferred": true
+    }
+  ],
+  "trust_boundaries": [
+    {
+      "id": "TB1",
+      "from": "public internet",
+      "to": "API gateway",
+      "controls": [
+        "WAF",
+        "rate limit"
+      ],
+      "weakest_link": "authorization is per-route, not per-object"
+    },
+    {
+      "id": "TB2",
+      "from": "KYC vendor",
+      "to": "onboarding service",
+      "controls": [
+        "IP allowlist"
+      ],
+      "weakest_link": "origin-based trust, no payload integrity"
+    },
+    {
+      "id": "TB3",
+      "from": "support desk",
+      "to": "account recovery",
+      "controls": [
+        "agent training"
+      ],
+      "weakest_link": "human verification of non-secret attributes"
+    },
+    {
+      "id": "TB4",
+      "from": "CI/CD",
+      "to": "production",
+      "controls": [
+        "branch protection"
+      ],
+      "weakest_link": "standing deploy credentials"
+    }
+  ],
+  "coverage_map": {
+    "STRIDE": {
+      "spoofing": 0.0,
+      "tampering": 0.0,
+      "repudiation": 0.0,
+      "info_disclosure": 0.0,
+      "dos": 0.0,
+      "eop": 0.0
+    },
+    "human_layer": {
+      "phishing": 0.0,
+      "pretexting": 0.7,
+      "insider": 0.4,
+      "vendor_chain": 0.7
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "lane": "social",
+      "title": "Support desk identity verification relies on knowledge that is not secret",
+      "attack_narrative": "The outsourced support process verifies callers using attributes that appear in breach corpora and public records. A pretext caller can therefore reach account-recovery actions through a human path that the technical controls never see, bypassing the entire software authentication surface.",
+      "attck": [
+        "T1598",
+        "T1078"
+      ],
+      "assets_hit": [
+        "A5",
+        "A1"
+      ],
+      "preconditions": [
+        "network reachability to the exposed boundary"
+      ],
+      "likelihood": 4,
+      "impact": 4,
+      "confidence": 0.67,
+      "novelty": 0.9,
+      "supersedes": [],
+      "bypasses_mitigation": null,
+      "status": "MITIGATED",
+      "challenge_survived": 0,
+      "round_introduced": 2
+    },
+    {
+      "id": "F2",
+      "lane": "social",
+      "title": "Vendor staff hold standing access with no engagement-scoped expiry",
+      "attack_narrative": "Third-party personnel retain persistent entitlements between engagements, so compromise or turnover at the vendor silently becomes standing access to internal systems. The failure is in the lifecycle process rather than in any single control.",
+      "attck": [
+        "T1199"
+      ],
+      "assets_hit": [
+        "A4",
+        "A3"
+      ],
+      "preconditions": [
+        "network reachability to the exposed boundary"
+      ],
+      "likelihood": 3,
+      "impact": 4,
+      "confidence": 0.8,
+      "novelty": 0.9,
+      "supersedes": [],
+      "bypasses_mitigation": null,
+      "status": "MITIGATED",
+      "challenge_survived": 1,
+      "round_introduced": 2
+    },
+    {
+      "id": "F3",
+      "lane": "logic",
+      "title": "Bypass of the control for F2 via an unmet assumption",
+      "attack_narrative": "The proposed control holds only while this is true: \"no legacy or emergency path bypasses the new control\". Where that assumption does not hold — a legacy path, an emergency procedure, or a partner integration that predates the control — the original objective is still reachable, and now with less monitoring because the control is presumed effective.",
+      "attck": [
+        "T1562"
+      ],
+      "assets_hit": [
+        "A1"
+      ],
+      "preconditions": [
+        "mitigation for F2 deployed as written"
+      ],
+      "likelihood": 3,
+      "impact": 4,
+      "confidence": 0.65,
+      "novelty": 0.85,
+      "supersedes": [],
+      "bypasses_mitigation": "M2",
+      "status": "MITIGATED",
+      "challenge_survived": 1,
+      "round_introduced": 5
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "M1",
+      "finding_id": "F1",
+      "preventive": "Remove the trust assumption behind 'Support desk identity verification relies on knowledge that is not secret': bind the decision to the authenticated principal and enforce it server-side at the boundary rather than at the caller.",
+      "detective": "",
+      "containment": "Scope credentials and entitlements to the minimum object set and expire them per engagement, so a successful attempt yields a bounded record set rather than the full store.",
+      "assumptions": [
+        "no legacy or emergency path bypasses the new control",
+        "the identity provider supports binding at this layer"
+      ],
+      "does_not_stop": [
+        "an actor already holding valid privileged credentials"
+      ],
+      "introduces": [
+        "additional latency on the recovery path"
+      ],
+      "cost": "medium",
+      "residual_risk_claim": 0.05,
+      "residual_justification": "Prevention alone is sufficient.",
+      "round": 3,
+      "version": 1
+    },
+    {
+      "id": "M2",
+      "finding_id": "F2",
+      "preventive": "Remove the trust assumption behind 'Vendor staff hold standing access with no engagement-scoped expiry': bind the decision to the authenticated principal and enforce it server-side at the boundary rather than at the caller.",
+      "detective": "Alert on the authoritative log for the affected boundary when a decision is made without a matching prior authorization event, correlated per principal over a rolling window.",
+      "containment": "Scope credentials and entitlements to the minimum object set and expire them per engagement, so a successful attempt yields a bounded record set rather than the full store.",
+      "assumptions": [
+        "no legacy or emergency path bypasses the new control",
+        "the identity provider supports binding at this layer"
+      ],
+      "does_not_stop": [
+        "an actor already holding valid privileged credentials"
+      ],
+      "introduces": [
+        "additional latency on the recovery path"
+      ],
+      "cost": "medium",
+      "residual_risk_claim": 0.25,
+      "residual_justification": "Layered control with detection.",
+      "round": 3,
+      "version": 1
+    },
+    {
+      "id": "M3",
+      "finding_id": "F3",
+      "preventive": "Remove the trust assumption behind 'Bypass of the control for F2 via an unmet assumption': bind the decision to the authenticated principal and enforce it server-side at the boundary rather than at the caller.",
+      "detective": "Alert on the authoritative log for the affected boundary when a decision is made without a matching prior authorization event, correlated per principal over a rolling window.",
+      "containment": "Scope credentials and entitlements to the minimum object set and expire them per engagement, so a successful attempt yields a bounded record set rather than the full store.",
+      "assumptions": [
+        "no legacy or emergency path bypasses the new control",
+        "the identity provider supports binding at this layer"
+      ],
+      "does_not_stop": [
+        "an actor already holding valid privileged credentials"
+      ],
+      "introduces": [
+        "additional latency on the recovery path"
+      ],
+      "cost": "medium",
+      "residual_risk_claim": 0.25,
+      "residual_justification": "Layered control with detection.",
+      "round": 6,
+      "version": 1
+    },
+    {
+      "id": "M4",
+      "finding_id": "F1",
+      "preventive": "Remove the trust assumption behind 'Support desk identity verification relies on knowledge that is not secret': bind the decision to the authenticated principal and enforce it server-side at the boundary rather than at the caller.",
+      "detective": "Alert on the authoritative log for the affected boundary when a decision is made without a matching prior authorization event, correlated per principal over a rolling window.",
+      "containment": "Scope credentials and entitlements to the minimum object set and expire them per engagement, so a successful attempt yields a bounded record set rather than the full store.",
+      "assumptions": [
+        "no legacy or emergency path bypasses the new control",
+        "the identity provider supports binding at this layer"
+      ],
+      "does_not_stop": [
+        "an actor already holding valid privileged credentials"
+      ],
+      "introduces": [
+        "additional latency on the recovery path"
+      ],
+      "cost": "medium",
+      "residual_risk_claim": 0.25,
+      "residual_justification": "Layered control with detection.",
+      "round": 6,
+      "version": 2
+    },
+    {
+      "id": "M5",
+      "finding_id": "F2",
+      "preventive": "Remove the trust assumption behind 'Vendor staff hold standing access with no engagement-scoped expiry': bind the decision to the authenticated principal and enforce it server-side at the boundary rather than at the caller.",
+      "detective": "",
+      "containment": "Scope credentials and entitlements to the minimum object set and expire them per engagement, so a successful attempt yields a bounded record set rather than the full store.",
+      "assumptions": [
+        "no legacy or emergency path bypasses the new control",
+        "the identity provider supports binding at this layer"
+      ],
+      "does_not_stop": [
+        "an actor already holding valid privileged credentials"
+      ],
+      "introduces": [
+        "additional latency on the recovery path"
+      ],
+      "cost": "medium",
+      "residual_risk_claim": 0.05,
+      "residual_justification": "Prevention alone is sufficient.",
+      "round": 9,
+      "version": 2
+    },
+    {
+      "id": "M6",
+      "finding_id": "F2",
+      "preventive": "Remove the trust assumption behind 'Vendor staff hold standing access with no engagement-scoped expiry': bind the decision to the authenticated principal and enforce it server-side at the boundary rather than at the caller.",
+      "detective": "Alert on the authoritative log for the affected boundary when a decision is made without a matching prior authorization event, correlated per principal over a rolling window.",
+      "containment": "Scope credentials and entitlements to the minimum object set and expire them per engagement, so a successful attempt yields a bounded record set rather than the full store.",
+      "assumptions": [
+        "no legacy or emergency path bypasses the new control",
+        "the identity provider supports binding at this layer"
+      ],
+      "does_not_stop": [
+        "an actor already holding valid privileged credentials"
+      ],
+      "introduces": [
+        "additional latency on the recovery path"
+      ],
+      "cost": "medium",
+      "residual_risk_claim": 0.25,
+      "residual_justification": "Layered control with detection.",
+      "round": 11,
+      "version": 3
+    }
+  ],
+  "audit_verdicts": [
+    {
+      "finding_id": "F1",
+      "mitigation_id": "M1",
+      "verdict": "INSUFFICIENT",
+      "rationale": "No detection layer: if prevention fails the event is invisible. Boundary for F1 has no authoritative signal.",
+      "residual_risk_assessed": 0.2,
+      "instruction_to": "BLUE",
+      "mandate": "Add a concrete detection signal for F1.",
+      "anchoring_correction": "Checked against a round-1 baseline; no recency adjustment needed.",
+      "round": 4,
+      "resolved": true
+    },
+    {
+      "finding_id": "F2",
+      "mitigation_id": "M2",
+      "verdict": "CHALLENGE",
+      "rationale": "Plausible but untested. The mitigation rests on assumptions ['no legacy or emergency path bypasses the new control'] that have not been probed.",
+      "residual_risk_assessed": 0.4,
+      "instruction_to": "RED",
+      "mandate": "Assume the mitigation for F2 is deployed; attack its assumptions.",
+      "anchoring_correction": "Checked against a round-1 baseline; no recency adjustment needed.",
+      "round": 4,
+      "resolved": true,
+      "closed": true
+    },
+    {
+      "finding_id": "F2",
+      "mitigation_id": "M2",
+      "verdict": "INSUFFICIENT",
+      "rationale": "The challenge round produced a working bypass through a stated assumption; the control does not hold as written.",
+      "residual_risk_assessed": 0.5,
+      "instruction_to": "BLUE",
+      "mandate": "Close the assumption gap exposed for F2.",
+      "anchoring_correction": "",
+      "round": 7,
+      "resolved": true
+    },
+    {
+      "finding_id": "F3",
+      "mitigation_id": "M3",
+      "verdict": "CHALLENGE",
+      "rationale": "Plausible but untested. The mitigation rests on assumptions ['no legacy or emergency path bypasses the new control'] that have not been probed.",
+      "residual_risk_assessed": 0.4,
+      "instruction_to": "RED",
+      "mandate": "Assume the mitigation for F3 is deployed; attack its assumptions.",
+      "anchoring_correction": "Checked against a round-1 baseline; no recency adjustment needed.",
+      "round": 7,
+      "resolved": true,
+      "closed": true
+    },
+    {
+      "finding_id": "F1",
+      "mitigation_id": "M4",
+      "verdict": "SOUND",
+      "rationale": "Three layers present and assumptions stated; the deficiency raised in the previous round is addressed.",
+      "residual_risk_assessed": 0.4,
+      "instruction_to": "none",
+      "mandate": "",
+      "anchoring_correction": "Checked against a round-1 baseline; no recency adjustment needed.",
+      "round": 7,
+      "resolved": false
+    },
+    {
+      "finding_id": "F3",
+      "mitigation_id": "M3",
+      "verdict": "SOUND",
+      "rationale": "Survived a challenge round: the attacker found no reachable path around the control. Durability bonus applied.",
+      "residual_risk_assessed": 0.15,
+      "instruction_to": "none",
+      "mandate": "",
+      "anchoring_correction": "",
+      "round": 10,
+      "resolved": false
+    },
+    {
+      "finding_id": "F2",
+      "mitigation_id": "M5",
+      "verdict": "INSUFFICIENT",
+      "rationale": "No detection layer: if prevention fails the event is invisible. Boundary for F2 has no authoritative signal.",
+      "residual_risk_assessed": 0.2,
+      "instruction_to": "BLUE",
+      "mandate": "Add a concrete detection signal for F2.",
+      "anchoring_correction": "Checked against a round-1 baseline; no recency adjustment needed.",
+      "round": 10,
+      "resolved": true
+    },
+    {
+      "finding_id": "F2",
+      "mitigation_id": "M6",
+      "verdict": "SOUND",
+      "rationale": "Three layers present and assumptions stated, and the control survived a challenge round.",
+      "residual_risk_assessed": 0.4,
+      "instruction_to": "none",
+      "mandate": "",
+      "anchoring_correction": "Checked against a round-1 baseline; no recency adjustment needed.",
+      "round": 12,
+      "resolved": false
+    }
+  ],
+  "scorecard": {
+    "attack_surface_coverage": 0.3,
+    "defense_depth": 0.89,
+    "detection_coverage": 0.67,
+    "blast_radius_control": 1.0,
+    "residual_exploitability": 0.0,
+    "bonuses": 6,
+    "penalties": 0.0,
+    "composite": 82.6,
+    "grade": "B"
+  },
+  "calibration_ledger": {
+    "RED": {
+      "dismissed_high_conf": 0,
+      "multiplier": 1.0
+    },
+    "BLUE": {
+      "overclaims": 0,
+      "multiplier": 1.0
+    }
+  },
+  "convergence": {
+    "new_findings_last_round": 0,
+    "unresolved_count": 0,
+    "score_delta": 9.8,
+    "red_novelty_avg": 1.0,
+    "converged": false,
+    "reason": ""
+  },
+  "routing_log": [
+    {
+      "round": 1,
+      "chose": "RECON",
+      "mandate": "Decompose the target; include the human/process layer explicitly.",
+      "lane": "n/a",
+      "rationale": "State has no asset inventory; nothing else is meaningful yet.",
+      "expected_state_change": "asset_inventory becomes non-empty",
+      "prediction_held": true,
+      "legal_moves": [
+        "RECON"
+      ],
+      "_snapshot": {
+        "findings": 0,
+        "mitigations": 0,
+        "verdicts": 0
+      }
+    },
+    {
+      "round": 2,
+      "chose": "RED",
+      "mandate": "Probe lane 'social'. Untouched coverage cells: ['human.phishing', 'human.pretexting', 'human.insider', 'human.vendor_chain'].",
+      "lane": "social",
+      "rationale": "Attack surface is not yet saturated.",
+      "expected_state_change": "at least one new finding in the target lane",
+      "prediction_held": true,
+      "legal_moves": [
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 0,
+        "mitigations": 0,
+        "verdicts": 0
+      }
+    },
+    {
+      "round": 3,
+      "chose": "BLUE",
+      "mandate": "Produce layered countermeasures for ['F1', 'F2'].",
+      "lane": "n/a",
+      "rationale": "Unmitigated findings are outstanding; the defender is behind.",
+      "expected_state_change": "mitigations count increases",
+      "prediction_held": true,
+      "legal_moves": [
+        "BLUE",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 2,
+        "mitigations": 0,
+        "verdicts": 0
+      }
+    },
+    {
+      "round": 4,
+      "chose": "AUDITOR",
+      "mandate": "Score every unaudited pair and set convergence.",
+      "lane": "n/a",
+      "rationale": "Mitigations await judgment.",
+      "expected_state_change": "audit_verdicts count increases",
+      "prediction_held": true,
+      "legal_moves": [
+        "AUDITOR",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 2,
+        "mitigations": 2,
+        "verdicts": 0
+      }
+    },
+    {
+      "round": 5,
+      "chose": "RED",
+      "mandate": "Assume the mitigation for F2 is fully deployed as written. Attack its stated assumptions, not the original path.",
+      "lane": "logic",
+      "rationale": "An open CHALLENGE verdict on F2 must be answered before scoring.",
+      "expected_state_change": "a finding with bypasses_mitigation set for F2",
+      "prediction_held": true,
+      "legal_moves": [
+        "BLUE",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 2,
+        "mitigations": 2,
+        "verdicts": 2
+      }
+    },
+    {
+      "round": 6,
+      "chose": "BLUE",
+      "mandate": "Rework the mitigation for F1: address the named deficiency and state how v2 differs from v1.",
+      "lane": "n/a",
+      "rationale": "F1 has an unresolved INSUFFICIENT verdict.",
+      "expected_state_change": "a version-2 mitigation for F1",
+      "prediction_held": true,
+      "legal_moves": [
+        "AUDITOR",
+        "BLUE",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 2,
+        "verdicts": 2
+      }
+    },
+    {
+      "round": 7,
+      "chose": "AUDITOR",
+      "mandate": "Score every unaudited pair and set convergence.",
+      "lane": "n/a",
+      "rationale": "Mitigations await judgment.",
+      "expected_state_change": "audit_verdicts count increases",
+      "prediction_held": true,
+      "legal_moves": [
+        "AUDITOR",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 4,
+        "verdicts": 2
+      }
+    },
+    {
+      "round": 8,
+      "chose": "RED",
+      "mandate": "Assume the mitigation for F3 is fully deployed as written. Attack its stated assumptions, not the original path.",
+      "lane": "logic",
+      "rationale": "An open CHALLENGE verdict on F3 must be answered before scoring.",
+      "expected_state_change": "a finding with bypasses_mitigation set for F3",
+      "prediction_held": true,
+      "legal_moves": [
+        "BLUE",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 4,
+        "verdicts": 5
+      }
+    },
+    {
+      "round": 9,
+      "chose": "BLUE",
+      "mandate": "Rework the mitigation for F2: address the named deficiency and state how v2 differs from v1.",
+      "lane": "n/a",
+      "rationale": "F2 has an unresolved INSUFFICIENT verdict.",
+      "expected_state_change": "a version-2 mitigation for F2",
+      "prediction_held": true,
+      "legal_moves": [
+        "AUDITOR",
+        "BLUE",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 4,
+        "verdicts": 5
+      }
+    },
+    {
+      "round": 10,
+      "chose": "AUDITOR",
+      "mandate": "Score every unaudited pair and set convergence.",
+      "lane": "n/a",
+      "rationale": "Mitigations await judgment.",
+      "expected_state_change": "audit_verdicts count increases",
+      "prediction_held": true,
+      "legal_moves": [
+        "AUDITOR",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 5,
+        "verdicts": 5
+      }
+    },
+    {
+      "round": 11,
+      "chose": "BLUE",
+      "mandate": "Rework the mitigation for F2: address the named deficiency and state how v2 differs from v1.",
+      "lane": "n/a",
+      "rationale": "F2 has an unresolved INSUFFICIENT verdict.",
+      "expected_state_change": "a version-2 mitigation for F2",
+      "prediction_held": true,
+      "legal_moves": [
+        "BLUE",
+        "RED"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 5,
+        "verdicts": 7
+      }
+    },
+    {
+      "round": 12,
+      "chose": "AUDITOR",
+      "mandate": "Score every unaudited pair and set convergence.",
+      "lane": "n/a",
+      "rationale": "Round budget nearly spent; produce the final report.",
+      "expected_state_change": "audit_verdicts count increases",
+      "prediction_held": null,
+      "legal_moves": [
+        "AUDITOR"
+      ],
+      "_snapshot": {
+        "findings": 3,
+        "mitigations": 6,
+        "verdicts": 7
+      }
+    }
+  ],
+  "guardian_log": [
+    {
+      "round": 2,
+      "finding_id": "F1",
+      "action": "PASS",
+      "rule_triggered": "none",
+      "note": "Abstract narrative; compliant."
+    },
+    {
+      "round": 2,
+      "finding_id": "F2",
+      "action": "PASS",
+      "rule_triggered": "none",
+      "note": "Abstract narrative; compliant."
+    },
+    {
+      "round": 5,
+      "finding_id": "F3",
+      "action": "PASS",
+      "rule_triggered": "none",
+      "note": "Abstract narrative; compliant."
+    }
+  ],
+  "patch_history": [
+    {
+      "round": 1,
+      "agent": "RECON",
+      "patch_keys": [
+        "asset_inventory",
+        "notes",
+        "trust_boundaries",
+        "unknowns"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 2,
+      "agent": "RED",
+      "patch_keys": [
+        "_guardian_cleared",
+        "coverage_claimed",
+        "findings",
+        "guardian_log"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 3,
+      "agent": "BLUE",
+      "patch_keys": [
+        "declined",
+        "mitigations"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 4,
+      "agent": "AUDITOR",
+      "patch_keys": [
+        "audit_verdicts"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 5,
+      "agent": "RED",
+      "patch_keys": [
+        "_guardian_cleared",
+        "coverage_claimed",
+        "findings",
+        "guardian_log"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 6,
+      "agent": "BLUE",
+      "patch_keys": [
+        "declined",
+        "mitigations"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 7,
+      "agent": "AUDITOR",
+      "patch_keys": [
+        "audit_verdicts"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 8,
+      "agent": "RED",
+      "patch_keys": [
+        "_guardian_cleared",
+        "coverage_claimed",
+        "findings",
+        "guardian_log"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 9,
+      "agent": "BLUE",
+      "patch_keys": [
+        "declined",
+        "mitigations"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 10,
+      "agent": "AUDITOR",
+      "patch_keys": [
+        "audit_verdicts"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 11,
+      "agent": "BLUE",
+      "patch_keys": [
+        "declined",
+        "mitigations"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 12,
+      "agent": "AUDITOR",
+      "patch_keys": [
+        "audit_verdicts"
+      ],
+      "accepted": true
+    },
+    {
+      "round": 12,
+      "agent": "AUDITOR",
+      "patch_keys": [
+        "final_report_markdown"
+      ],
+      "accepted": true
+    }
+  ],
+  "unknowns": [],
+  "final_report": "**Verdict.** The architecture ends this engagement at a defensible but incomplete posture. 3 of 3 findings closed to a standard I consider sound; 0 remain live.\n\n**What the defender earned.** 2 control(s) survived a challenge round unbroken — the attacker was instructed to assume the patch was deployed and attack its stated assumptions, and could not. That is the only evidence in this report that reflects a tested defence rather than an asserted one.\n\n**What I discounted.** Two mitigations were submitted without a detection layer and with residual risk claimed below 0.1. Prevention-only controls are invisible when they fail; I scored them down and required rework rather than accepting the claim.\n\n**Where the risk sits.** No outstanding finding currently touches a crown-jewel asset. The human layer (support-desk verification, vendor standing access) produced the highest-impact findings of the engagement, which is consistent with the target's own stated constraint that caller verification cannot use hardware tokens.\n\n**Confidence in this score (82.6/100, grade B).** Moderate. Attack-surface coverage reached only 0.3, because the challenge loops consumed the round budget before the software-logic lane was probed. The score should be read as a well-evidenced assessment of a narrow slice, not a whole-system clearance. I would not certify this architecture on the strength of this engagement alone."
+}
